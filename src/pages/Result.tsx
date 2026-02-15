@@ -24,6 +24,7 @@ export default function ResultPage() {
     disease_info,
     cure,
     image_url,
+    gradcam_image
   } = data;
 
   /* 🔴 LOW CONFIDENCE CASE */
@@ -79,6 +80,23 @@ export default function ResultPage() {
           <p className="text-lg font-medium">{crop}</p>
           <p className="text-gray-700">{crop_info}</p>
         </section>
+
+        {gradcam_image && (
+          <section className="space-y-2">
+            <h2 className="text-xl font-semibold">🔥 AI Focus Area (Grad-CAM)</h2>
+            <div className="w-full h-64 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+              <img
+                src={`data:image/jpeg;base64,${gradcam_image}`}
+                alt="Grad-CAM"
+                className="object-contain h-full"
+              />
+            </div>
+            <p className="text-sm text-gray-500">
+              Highlighted regions indicate areas the AI focused on while making its diagnosis.
+            </p>
+          </section>
+        )}
+
 
         <section className="space-y-2">
           <h2 className="text-xl font-semibold">📸 Uploaded Leaf Image</h2>
