@@ -3,19 +3,28 @@ import { Leaf } from "lucide-react";
 import Header from "@/components/Header";
 import UploadArea from "@/components/UploadArea";
 import ProcessingSpinner from "@/components/ProcessingSpinner";
+import HistorySidebar from "@/components/HistorySidebar";
 import { useNavigate } from "react-router-dom";
 import { predictCrop } from "@/lib/api";
+import { usePredictionHistory } from "@/hooks/use-prediction-history";
 
 
 const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
+  const { history, loading: historyLoading, refetch, clearHistory } = usePredictionHistory();
 
   const handleAnalyze = useCallback(async (file: File) => {
   setIsProcessing(true);
 
   try {
     const data = await predictCrop(file);
+
+    // Refetch prediction history after successful prediction
+    // (the backend logs it to Supabase)
+    if (data.status === "success") {
+      setTimeout(() => refetch(), 1000); // small delay for Supabase write propagation
+    }
 
     navigate("/result", {
       state: {
@@ -30,7 +39,7 @@ const Index = () => {
   } finally {
     setIsProcessing(false);
   }
-}, [navigate]);
+}, [navigate, refetch]);
 
 
   return (
@@ -69,6 +78,30 @@ const Index = () => {
           )}
 
         </main>
+
+        {/* Prediction History Sidebar */}
+        <aside className="hidden w-80 shrink-0 border-l p-4 lg:block">
+          <HistorySidebar
+            history={history}
+            loading={historyLoading}
+            onSelect={(record) => {
+              navigate("/result", {
+                state: {
+                  status: "success",
+                  crop: record.crop_name,
+                  disease: record.disease_name.replace(/_/g, " "),
+                  confidence: record.confidence,
+                  crop_info: "View full details by re-analyzing.",
+                  disease_info: null,
+                  cure: null,
+                  image_url: record.image_url,
+                  gradcam_image: null,
+                },
+              });
+            }}
+            onClear={clearHistory}
+          />
+        </aside>
       </div>
     </div>
   );

@@ -98,12 +98,14 @@ export default function ResultPage() {
         )}
 
 
+        {image_url && (
         <section className="space-y-2">
           <h2 className="text-xl font-semibold">📸 Uploaded Leaf Image</h2>
           <div className="w-full h-64 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
             <img src={image_url} alt="Crop Leaf" className="object-contain h-full" />
           </div>
         </section>
+        )}
 
         <section className="space-y-2">
           <h2 className="text-xl font-semibold">🦠 Disease Status</h2>
