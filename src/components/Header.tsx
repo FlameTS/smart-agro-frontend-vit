@@ -2,15 +2,26 @@ import { Link, useLocation } from "react-router-dom";
 import { Leaf, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLang } from "@/context/LangContext";
+
+const LABELS = {
+  en: { home: "Home", about: "About", team: "Team" },
+  hi: { home: "होम", about: "के बारे में", team: "टीम" },
+  ta: { home: "முகப்பு", about: "பற்றி", team: "அணி" },
+  pa: { home: "ਹੋਮ", about: "ਬਾਰੇ", team: "ਟੀਮ" },
+};
 
 const Header = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { lang } = useLang();
+  const t = LABELS[lang] ?? LABELS["en"];
+
   const links = [
-    { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
-    { to: "/team", label: "Team" },
+    { to: "/", label: t.home },
+    { to: "/about", label: t.about },
+    { to: "/team", label: t.team },
   ];
 
   return (
