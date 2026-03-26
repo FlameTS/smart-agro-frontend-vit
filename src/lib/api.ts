@@ -1,6 +1,6 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 
-export async function predictCrop(file: File) {
+export async function predictCrop(file: File, lang: string = "en") {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
