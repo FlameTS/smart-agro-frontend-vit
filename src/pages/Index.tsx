@@ -31,6 +31,7 @@ const Index = () => {
         state: {
           ...data,
           image_url: URL.createObjectURL(file),
+          lang: lang,
         },
       });
 
@@ -40,7 +41,7 @@ const Index = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [navigate, refetch]);
+  }, [navigate, refetch, lang]);
 
 
   return (
@@ -77,8 +78,8 @@ const Index = () => {
                       key={l.code}
                       onClick={() => setLang(l.code)}
                       className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${lang === l.code
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                     >
                       {l.label}
