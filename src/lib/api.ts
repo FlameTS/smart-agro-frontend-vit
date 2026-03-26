@@ -1,12 +1,15 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 
-export async function predictCrop(file: File, lang: string = "en") {
+export async function predictCrop(file: File, lang) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   const formData = new FormData();
   formData.append("file", file);
 
+  formData.append("lang", lang);
+
+  console.log("LANG SENT:", lang);
   try {
     const response = await fetch(`${API_BASE}/predict`, {
       method: "POST",
