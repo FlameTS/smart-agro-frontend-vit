@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useLang } from "@/context/LangContext";
 
 const CONFIDENCE_THRESHOLD = 0.6;
 
@@ -79,7 +80,7 @@ export default function ResultPage() {
   const navigate = useNavigate();
   const data = location.state;
 
-  const lang = (data?.lang as keyof typeof LABELS) || "en";
+  const { lang } = useLang();
   const t = LABELS[lang] ?? LABELS["en"];
 
   if (!data) {

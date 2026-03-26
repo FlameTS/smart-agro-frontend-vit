@@ -7,13 +7,41 @@ import HistorySidebar from "@/components/HistorySidebar";
 import { useNavigate } from "react-router-dom";
 import { predictCrop } from "@/lib/api";
 import { usePredictionHistory } from "@/hooks/use-prediction-history";
+import { useLang } from "@/context/LangContext";
 
+const LABELS = {
+  en: {
+    title: "Smart Agro Crop Disease Detection",
+    subtitle: "Upload a photo of your crop leaf and get instant AI-based disease analysis with treatment recommendations.",
+  },
+  hi: {
+    title: "स्मार्ट एग्रो फसल रोग पहचान",
+    subtitle: "अपनी फसल की पत्ती की फोटो अपलोड करें और उपचार की सिफारिशों के साथ तत्काल AI-आधारित रोग विश्लेषण प्राप्त करें।",
+  },
+  ta: {
+    title: "ஸ்மார்ட் அக்ரோ பயிர் நோய் கண்டறிதல்",
+    subtitle: "உங்கள் பயிர் இலையின் புகைப்படத்தை பதிவேற்றி சிகிச்சை பரிந்துரைகளுடன் உடனடி AI-அடிப்படையிலான நோய் பகுப்பாய்வைப் பெறுங்கள்.",
+  },
+  pa: {
+    title: "ਸਮਾਰਟ ਐਗਰੋ ਫਸਲ ਰੋਗ ਖੋਜ",
+    subtitle: "ਆਪਣੀ ਫਸਲ ਦੀ ਪੱਤੀ ਦੀ ਫੋਟੋ ਅਪਲੋਡ ਕਰੋ ਅਤੇ ਇਲਾਜ ਦੀਆਂ ਸਿਫ਼ਾਰਸ਼ਾਂ ਦੇ ਨਾਲ ਤੁਰੰਤ AI-ਆਧਾਰਿਤ ਰੋਗ ਵਿਸ਼ਲੇਸ਼ਣ ਪ੍ਰਾਪਤ ਕਰੋ।",
+  },
+};
+
+const LANG_OPTIONS = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिंदी" },
+  { code: "ta", label: "தமிழ்" },
+  { code: "pa", label: "ਪੰਜਾਬੀ" },
+] as const;
 
 const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { history, loading: historyLoading, refetch, clearHistory } = usePredictionHistory();
-  const [lang, setLang] = useState("en");
+  const { lang, setLang } = useLang();
+
+  const t = LABELS[lang] ?? LABELS["en"];
 
   const handleAnalyze = useCallback(async (file: File) => {
     setIsProcessing(true);
@@ -21,17 +49,15 @@ const Index = () => {
     try {
       const data = await predictCrop(file, lang);
 
-      // Refetch prediction history after successful prediction
-      // (the backend logs it to Supabase)
       if (data.status === "success") {
-        setTimeout(() => refetch(), 1000); // small delay for Supabase write propagation
+        setTimeout(() => refetch(), 1000);
       }
 
       navigate("/result", {
         state: {
           ...data,
           image_url: URL.createObjectURL(file),
-          lang: lang,
+
         },
       });
 
@@ -58,22 +84,12 @@ const Index = () => {
                 <Leaf className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold md:text-2xl">
-                  Smart Agro Crop Disease Detection
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Upload a photo of your crop leaf and get instant AI-based disease analysis
-                  with treatment recommendations.
-                </p>
+                <h1 className="text-xl font-bold md:text-2xl">{t.title}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
-                {/*Language Selector*/}
+                {/* Language Selector */}
                 <div className="mt-3 flex gap-2">
-                  {[
-                    { code: "en", label: "English" },
-                    { code: "hi", label: "हिंदी" },
-                    { code: "ta", label: "தமிழ்" },
-                    { code: "pa", label: "ਪੰਜਾਬੀ" },
-                  ].map((l) => (
+                  {LANG_OPTIONS.map((l) => (
                     <button
                       key={l.code}
                       onClick={() => setLang(l.code)}
@@ -84,7 +100,8 @@ const Index = () => {
                     >
                       {l.label}
                     </button>
-                  ))} </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
