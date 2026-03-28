@@ -9,6 +9,7 @@ import { predictCrop } from "@/lib/api";
 import { usePredictionHistory } from "@/hooks/use-prediction-history";
 import { useLang } from "@/context/LangContext";
 import ChatBot from "@/components/ChatBot";
+import { useChatHistory } from "@/hooks/use-chat-history";
 
 const LABELS = {
   en: {
@@ -41,6 +42,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { history, loading: historyLoading, refetch, clearHistory } = usePredictionHistory();
   const { lang, setLang } = useLang();
+  const { sessions, loading: chatLoading } = useChatHistory();
 
   const t = LABELS[lang] ?? LABELS["en"];
 
@@ -111,6 +113,47 @@ const Index = () => {
           <UploadArea onAnalyze={handleAnalyze} isProcessing={isProcessing} />
 
           <ChatBot language={lang} diseaseContext={null} />
+
+          {/* Recent Chats Section */}
+          {sessions.length > 0 && (
+            <div style={{
+              width: "100%", marginTop: "8px",
+              border: "1px solid #d1fae5", borderRadius: "12px",
+              padding: "16px", background: "#f0fdf4"
+            }}>
+              <h3 style={{
+                margin: "0 0 12px", color: "#166534",
+                fontSize: "15px", fontWeight: 600
+              }}>
+                🕒 Recent Chats
+              </h3>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {sessions.map((s, i) => (
+                  <div
+                    key={i}
+                    onClick={() => navigate("/chat", {
+                      state: { sessionId: s.session_id }
+                    })}
+                    style={{
+                      background: "white", borderRadius: "8px",
+                      padding: "10px 14px", cursor: "pointer",
+                      border: "1px solid #bbf7d0",
+                      display: "flex", justifyContent: "space-between",
+                      alignItems: "center"
+                    }}
+                  >
+                    <span style={{ fontSize: "13px", color: "#166534", flex: 1 }}>
+                      💬 {s.preview}
+                    </span>
+                    <span style={{ fontSize: "11px", color: "#9ca3af", marginLeft: "12px" }}>
+                      {s.date}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Processing spinner */}
           {isProcessing && (

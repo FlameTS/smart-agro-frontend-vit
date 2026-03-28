@@ -4,13 +4,22 @@ import { useLang } from "@/context/LangContext";
 import ReactMarkdown from "react-markdown";
 
 const LANGUAGES = {
-    en: { placeholder: "Ask me anything about your crops...", send: "Send", clear: "Clear Chat", back: "← Back" },
-    hi: { placeholder: "अपनी फसल के बारे में पूछें...", send: "भेजें", clear: "चैट साफ़ करें", back: "← वापस" },
-    pa: { placeholder: "ਆਪਣੀ ਫਸਲ ਬਾਰੇ ਪੁੱਛੋ...", send: "ਭੇਜੋ", clear: "ਚੈਟ ਸਾਫ਼ ਕਰੋ", back: "← ਵਾਪਸ" },
-    ta: { placeholder: "உங்கள் பயிர் பற்றி கேளுங்கள்...", send: "அனுப்பு", clear: "அரட்டையை அழி", back: "← திரும்பு" },
+    en: { placeholder: "Ask me anything about your crops...", send: "Send", clear: "Clear Chat", back: "← Back", history: "Past Chats", newChat: "New Chat" },
+    hi: { placeholder: "अपनी फसल के बारे में पूछें...", send: "भेजें", clear: "चैट साफ़ करें", back: "← वापस", history: "पुरानी चैट", newChat: "नई चैट" },
+    pa: { placeholder: "ਆਪਣੀ ਫਸਲ ਬਾਰੇ ਪੁੱਛੋ...", send: "ਭੇਜੋ", clear: "ਚੈਟ ਸਾਫ਼ ਕਰੋ", back: "← ਵਾਪਸ", history: "ਪੁਰਾਣੀ ਚੈਟ", newChat: "ਨਵੀਂ ਚੈਟ" },
+    ta: { placeholder: "உங்கள் பயிர் பற்றி கேளுங்கள்...", send: "அனுப்பு", clear: "அரட்டையை அழி", back: "← திரும்பு", history: "பழைய அரட்டை", newChat: "புதிய அரட்டை" },
 };
 
-const SESSION_ID = `session_${Date.now()}`;
+// Stable session ID per browser tab - persists across refresh
+const getSessionId = () => {
+    let id = localStorage.getItem("chat_session_id");
+    if (!id) {
+        id = `session_${Date.now()}`;
+        localStorage.setItem("chat_session_id", id);
+    }
+    return id;
+};
+
 
 export default function ChatPage() {
     const location = useLocation();
@@ -20,23 +29,73 @@ export default function ChatPage() {
 
     const initialMessage = location.state?.initialMessage || "";
     const diseaseContext = location.state?.diseaseContext || null;
+    const sessionIdFromHistory = location.state?.sessionId || null;
+
+    const SESSION_ID = getSessionId();
 
     const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
+    const [pastSessions, setPastSessions] = useState<{ session_id: string; preview: string; date: string }[]>([]);
+    const [showSidebar, setShowSidebar] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const hasSentInitial = useRef(false);
 
-    // Auto-send the first message that came from home/result page
+    // Load session if coming from history click on home page
     useEffect(() => {
-        if (initialMessage) {
+        if (sessionIdFromHistory) {
+            loadSession(sessionIdFromHistory);
+        }
+    }, []);
+
+    // Load messages from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem(`chat_messages_${SESSION_ID}`);
+        if (saved) {
+            setMessages(JSON.parse(saved));
+        }
+    }, []);
+
+    // Send initial message once
+    useEffect(() => {
+        if (initialMessage && !hasSentInitial.current) {
+            hasSentInitial.current = true;
             sendMessage(initialMessage);
         }
     }, []);
 
-    // Auto scroll to bottom
+    // Auto scroll
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, loading]);
+
+    // Load past sessions from Supabase
+    const loadPastSessions = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions`);
+            const data = await res.json();
+            setPastSessions(data.sessions || []);
+        } catch {
+            console.error("Failed to load sessions");
+        }
+    };
+
+    // Load a past session's messages
+    const loadSession = async (sessionId: string) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions/${sessionId}`);
+            const data = await res.json();
+            const loaded = (data.messages || []).map((m: any) => ({
+                role: m.role === "bot" ? "bot" : "user",
+                text: m.message,
+            }));
+            setMessages(loaded);
+            localStorage.setItem("chat_session_id", sessionId);
+            setShowSidebar(false);
+        } catch {
+            console.error("Failed to load session");
+        }
+    };
 
     const sendMessage = async (overrideMessage?: string) => {
         const text = overrideMessage || input.trim();
@@ -68,19 +127,23 @@ export default function ChatPage() {
 
     const clearChat = async () => {
         setMessages([]);
+        localStorage.removeItem(`chat_messages_${SESSION_ID}`);
         try {
-            await fetch(`${import.meta.env.VITE_API_URL}/chat/history/${SESSION_ID}`, {
-                method: "DELETE",
-            });
+            await fetch(`${import.meta.env.VITE_API_URL}/chat/history/${SESSION_ID}`, { method: "DELETE" });
         } catch { }
     };
 
+    const startNewChat = () => {
+        const newId = `session_${Date.now()}`;
+        localStorage.setItem("chat_session_id", newId);
+        localStorage.removeItem(`chat_messages_${newId}`);
+        setMessages([]);
+        setShowSidebar(false);
+        window.location.reload();
+    };
+
     return (
-        <div style={{
-            minHeight: "100vh", background: "#0f172a",
-            display: "flex", flexDirection: "column",
-            fontFamily: "sans-serif"
-        }}>
+        <div style={{ minHeight: "100vh", background: "#0f172a", display: "flex", flexDirection: "column", fontFamily: "sans-serif" }}>
 
             {/* Header */}
             <div style={{
@@ -89,22 +152,69 @@ export default function ChatPage() {
                 justifyContent: "space-between",
                 borderBottom: "1px solid #334155"
             }}>
-                <button onClick={() => navigate(-1)} style={{
-                    background: "none", border: "1px solid #475569",
-                    color: "#94a3b8", borderRadius: "8px",
-                    padding: "6px 14px", cursor: "pointer", fontSize: "14px"
-                }}>{t.back}</button>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <button onClick={() => navigate(-1)} style={{
+                        background: "none", border: "1px solid #475569",
+                        color: "#94a3b8", borderRadius: "8px",
+                        padding: "6px 14px", cursor: "pointer", fontSize: "14px"
+                    }}>{t.back}</button>
 
-                <h1 style={{ color: "#f1f5f9", fontSize: "18px", margin: 0 }}>
-                    🌾 Farm Assistant
-                </h1>
+                    <button onClick={() => { setShowSidebar(!showSidebar); loadPastSessions(); }} style={{
+                        background: "none", border: "1px solid #475569",
+                        color: "#94a3b8", borderRadius: "8px",
+                        padding: "6px 14px", cursor: "pointer", fontSize: "14px"
+                    }}>📋 {t.history}</button>
+                </div>
 
-                <button onClick={clearChat} style={{
-                    background: "none", border: "1px solid #ef4444",
-                    color: "#ef4444", borderRadius: "8px",
-                    padding: "6px 14px", cursor: "pointer", fontSize: "14px"
-                }}>{t.clear}</button>
+                <h1 style={{ color: "#f1f5f9", fontSize: "18px", margin: 0 }}>🌾 Farm Assistant</h1>
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <button onClick={startNewChat} style={{
+                        background: "none", border: "1px solid #22c55e",
+                        color: "#22c55e", borderRadius: "8px",
+                        padding: "6px 14px", cursor: "pointer", fontSize: "14px"
+                    }}>+ {t.newChat}</button>
+
+                    <button onClick={clearChat} style={{
+                        background: "none", border: "1px solid #ef4444",
+                        color: "#ef4444", borderRadius: "8px",
+                        padding: "6px 14px", cursor: "pointer", fontSize: "14px"
+                    }}>{t.clear}</button>
+                </div>
             </div>
+
+            {/* Past sessions sidebar */}
+            {showSidebar && (
+                <div style={{
+                    position: "fixed", top: 0, left: 0,
+                    width: "300px", height: "100vh",
+                    background: "#1e293b", borderRight: "1px solid #334155",
+                    zIndex: 100, padding: "20px", overflowY: "auto"
+                }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ color: "#f1f5f9", margin: 0 }}>📋 {t.history}</h3>
+                        <button onClick={() => setShowSidebar(false)} style={{
+                            background: "none", border: "none",
+                            color: "#94a3b8", cursor: "pointer", fontSize: "18px"
+                        }}>✕</button>
+                    </div>
+
+                    {pastSessions.length === 0 ? (
+                        <p style={{ color: "#64748b", fontSize: "14px" }}>No past chats found.</p>
+                    ) : (
+                        pastSessions.map((s, i) => (
+                            <div key={i} onClick={() => loadSession(s.session_id)} style={{
+                                background: "#0f172a", borderRadius: "8px",
+                                padding: "12px", marginBottom: "8px",
+                                cursor: "pointer", border: "1px solid #334155"
+                            }}>
+                                <p style={{ color: "#e2e8f0", fontSize: "13px", margin: "0 0 4px" }}>{s.preview}</p>
+                                <p style={{ color: "#64748b", fontSize: "11px", margin: 0 }}>{s.date}</p>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
 
             {/* Disease context badge */}
             {diseaseContext && (
@@ -119,9 +229,8 @@ export default function ChatPage() {
 
             {/* Messages */}
             <div style={{
-                flex: 1, overflowY: "auto",
-                padding: "24px", display: "flex",
-                flexDirection: "column", gap: "16px"
+                flex: 1, overflowY: "auto", padding: "24px",
+                display: "flex", flexDirection: "column", gap: "16px"
             }}>
                 {messages.length === 0 && !loading && (
                     <div style={{ color: "#64748b", textAlign: "center", marginTop: "60px", fontSize: "15px" }}>
@@ -157,9 +266,7 @@ export default function ChatPage() {
                             background: "#1e293b", border: "1px solid #334155",
                             borderRadius: "16px 16px 16px 4px",
                             padding: "12px 16px", color: "#64748b", fontSize: "14px"
-                        }}>
-                            Thinking...
-                        </div>
+                        }}>Thinking...</div>
                     </div>
                 )}
                 <div ref={bottomRef} />
@@ -178,9 +285,8 @@ export default function ChatPage() {
                     placeholder={t.placeholder}
                     rows={2}
                     style={{
-                        flex: 1, padding: "12px 16px",
-                        borderRadius: "12px", fontSize: "14px",
-                        background: "#0f172a", color: "#f1f5f9",
+                        flex: 1, padding: "12px 16px", borderRadius: "12px",
+                        fontSize: "14px", background: "#0f172a", color: "#f1f5f9",
                         border: "1px solid #334155", outline: "none",
                         resize: "none", fontFamily: "sans-serif"
                     }}
