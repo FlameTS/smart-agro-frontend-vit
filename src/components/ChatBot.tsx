@@ -55,7 +55,7 @@ export default function ChatBot({ language = "en", diseaseContext = null }: Chat
     return (
         <div style={{
             border: "1px solid #d1fae5", borderRadius: "12px",
-            padding: "16px", maxWidth: "100%", margin: "24px auto",
+            padding: "16px", width: "100%", margin: "24px 0",
             background: "#f0fdf4", fontFamily: "sans-serif"
         }}>
             <h3 style={{ margin: "0 0 12px", color: "#166534" }}>{lang.title}</h3>
