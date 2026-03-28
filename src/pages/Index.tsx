@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { predictCrop } from "@/lib/api";
 import { usePredictionHistory } from "@/hooks/use-prediction-history";
 import { useLang } from "@/context/LangContext";
+import ChatBot from "@/components/ChatBot";
 
 const LABELS = {
   en: {
@@ -108,6 +109,8 @@ const Index = () => {
 
           {/* Upload section */}
           <UploadArea onAnalyze={handleAnalyze} isProcessing={isProcessing} />
+
+          <ChatBot language={lang} diseaseContext={null} />
 
           {/* Processing spinner */}
           {isProcessing && (

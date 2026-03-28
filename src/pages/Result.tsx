@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLang } from "@/context/LangContext";
+import ChatBot from "@/components/ChatBot";
 
 const CONFIDENCE_THRESHOLD = 0.6;
 
@@ -90,6 +91,8 @@ export default function ResultPage() {
       </div>
     );
   }
+
+
 
   const {
     crop,
@@ -205,6 +208,15 @@ export default function ResultPage() {
             {t.analyzeAnother}
           </button>
         </div>
+
+        <ChatBot
+          language={lang}
+          diseaseContext={{
+            disease,
+            crop,
+            confidence: (confidence * 100).toFixed(2)
+          }}
+        />
       </div>
     </div>
   );
