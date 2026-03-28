@@ -74,7 +74,7 @@ export default function ChatBot({ language = "en", diseaseContext = null }: Chat
             {/* Chat messages */}
             {(messages.length > 0 || loading) && (
                 <div style={{
-                    maxHeight: "300px", overflowY: "auto",
+                    maxHeight: "500px", overflowY: "auto",
                     background: "white", borderRadius: "8px",
                     padding: "12px", marginBottom: "12px",
                     border: "1px solid #bbf7d0"
@@ -102,14 +102,16 @@ export default function ChatBot({ language = "en", diseaseContext = null }: Chat
 
             {/* Input */}
             <div style={{ display: "flex", gap: "8px" }}>
-                <input
+                <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
                     placeholder={lang.placeholder}
+                    rows={3}
                     style={{
                         flex: 1, padding: "10px 14px", borderRadius: "8px",
-                        border: "1px solid #bbf7d0", fontSize: "14px", outline: "none"
+                        border: "1px solid #bbf7d0", fontSize: "14px", outline: "none",
+                        resize: "none", fontFamily: "sans-serif"
                     }}
                 />
                 <button
