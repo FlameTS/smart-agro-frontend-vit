@@ -114,7 +114,7 @@ const Index = () => {
 
           <ChatBot language={lang} diseaseContext={null} />
 
-          {/* Recent Chats Section */}
+          {/* Recent Chats Section
           {sessions.length > 0 && (
             <div style={{
               width: "100%", marginTop: "8px",
@@ -153,7 +153,7 @@ const Index = () => {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Processing spinner */}
           {isProcessing && (
@@ -185,6 +185,8 @@ const Index = () => {
               });
             }}
             onClear={clearHistory}
+            chatSessions={sessions}
+            chatLoading={chatLoading}
           />
         </aside>
       </div>
