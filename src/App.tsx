@@ -9,6 +9,7 @@ import Index from "@/pages/Index";
 import About from "@/pages/About";
 import Team from "@/pages/Team";
 import Result from "@/pages/Result";
+import ChatPage from "@/pages/ChatPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/team" element={<Team />} />
             <Route path="/result" element={<Result />} />
+            <Route path="/chat" element={<ChatPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
