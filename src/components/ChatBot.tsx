@@ -7,7 +7,18 @@ const LANGUAGES = {
     ta: { placeholder: "உங்கள் பயிர் பற்றி கேளுங்கள்...", send: "அனுப்பு", title: "🌾 விவசாய உதவியாளர்" },
 };
 
-export default function ChatBot({ language = "en", diseaseContext = null }) {
+interface DiseaseContext {
+    disease: string;
+    crop: string;
+    confidence: string | number;
+}
+
+interface ChatBotProps {
+    language?: string;
+    diseaseContext?: DiseaseContext | null;
+}
+
+export default function ChatBot({ language = "en", diseaseContext = null }: ChatBotProps) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -44,7 +55,7 @@ export default function ChatBot({ language = "en", diseaseContext = null }) {
     return (
         <div style={{
             border: "1px solid #d1fae5", borderRadius: "12px",
-            padding: "16px", maxWidth: "700px", margin: "32px auto",
+            padding: "16px", maxWidth: "100%", margin: "24px auto",
             background: "#f0fdf4", fontFamily: "sans-serif"
         }}>
             <h3 style={{ margin: "0 0 12px", color: "#166534" }}>{lang.title}</h3>
@@ -61,34 +72,33 @@ export default function ChatBot({ language = "en", diseaseContext = null }) {
             )}
 
             {/* Chat messages */}
-            <div style={{
-                minHeight: "150px", maxHeight: "300px", overflowY: "auto",
-                background: "white", borderRadius: "8px",
-                padding: "12px", marginBottom: "12px",
-                border: "1px solid #bbf7d0"
-            }}>
-                {messages.length === 0 && (
-                    <p style={{ color: "#9ca3af", fontSize: "14px" }}>Ask anything about your crops or disease treatment...</p>
-                )}
-                {messages.map((msg, i) => (
-                    <div key={i} style={{
-                        textAlign: msg.role === "user" ? "right" : "left",
-                        marginBottom: "8px"
-                    }}>
-                        <span style={{
-                            display: "inline-block", padding: "8px 12px",
-                            borderRadius: "8px", fontSize: "14px", maxWidth: "80%",
-                            background: msg.role === "user" ? "#16a34a" : "#f3f4f6",
-                            color: msg.role === "user" ? "white" : "#111"
+            {(messages.length > 0 || loading) && (
+                <div style={{
+                    maxHeight: "300px", overflowY: "auto",
+                    background: "white", borderRadius: "8px",
+                    padding: "12px", marginBottom: "12px",
+                    border: "1px solid #bbf7d0"
+                }}>
+                    {messages.map((msg, i) => (
+                        <div key={i} style={{
+                            textAlign: msg.role === "user" ? "right" : "left",
+                            marginBottom: "8px"
                         }}>
-                            {msg.text}
-                        </span>
-                    </div>
-                ))}
-                {loading && (
-                    <div style={{ color: "#6b7280", fontSize: "13px" }}>Thinking...</div>
-                )}
-            </div>
+                            <span style={{
+                                display: "inline-block", padding: "8px 12px",
+                                borderRadius: "8px", fontSize: "14px", maxWidth: "80%",
+                                background: msg.role === "user" ? "#16a34a" : "#f3f4f6",
+                                color: msg.role === "user" ? "white" : "#111"
+                            }}>
+                                {msg.text}
+                            </span>
+                        </div>
+                    ))}
+                    {loading && (
+                        <div style={{ color: "#6b7280", fontSize: "13px" }}>Thinking...</div>
+                    )}
+                </div>
+            )}
 
             {/* Input */}
             <div style={{ display: "flex", gap: "8px" }}>
