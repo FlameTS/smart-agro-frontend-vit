@@ -13,6 +13,7 @@ import Result from "@/pages/Result";
 import ChatPage from "@/pages/ChatPage";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
+import Marketplace from "@/pages/Marketplace";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/result" element={<Result />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
