@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getAuthHeaders } from "@/lib/api";
 
 interface ChatSession {
     session_id: string;
@@ -12,7 +13,8 @@ export function useChatHistory() {
 
     const fetchSessions = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions`);
+            const headers = await getAuthHeaders();
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions`, { headers });
             const data = await res.json();
             setSessions(data.sessions?.slice(0, 5) || []); // only last 5
         } catch {

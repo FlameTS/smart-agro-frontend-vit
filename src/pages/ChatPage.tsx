@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLang } from "@/context/LangContext";
 import ReactMarkdown from "react-markdown";
+import { getAuthHeaders } from "@/lib/api";
 
 const LANGUAGES = {
     en: { placeholder: "Ask me anything about your crops...", send: "Send", clear: "Clear Chat", back: "← Back", history: "Past Chats", newChat: "New Chat" },
@@ -72,7 +73,8 @@ export default function ChatPage() {
     // Load past sessions from Supabase
     const loadPastSessions = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions`);
+            const headers = await getAuthHeaders();
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions`, { headers });
             const data = await res.json();
             setPastSessions(data.sessions || []);
         } catch {
@@ -83,7 +85,8 @@ export default function ChatPage() {
     // Load a past session's messages
     const loadSession = async (sessionId: string) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions/${sessionId}`);
+            const headers = await getAuthHeaders();
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/chat/sessions/${sessionId}`, { headers });
             const data = await res.json();
             const loaded = (data.messages || []).map((m: any) => ({
                 role: m.role === "bot" ? "bot" : "user",
@@ -106,9 +109,10 @@ export default function ChatPage() {
         setLoading(true);
 
         try {
+            const authHeaders = await getAuthHeaders();
             const res = await fetch(`${import.meta.env.VITE_API_URL}/chat`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...authHeaders },
                 body: JSON.stringify({
                     message: text,
                     language: lang,
@@ -129,7 +133,8 @@ export default function ChatPage() {
         setMessages([]);
         localStorage.removeItem(`chat_messages_${SESSION_ID}`);
         try {
-            await fetch(`${import.meta.env.VITE_API_URL}/chat/history/${SESSION_ID}`, { method: "DELETE" });
+            const headers = await getAuthHeaders();
+            await fetch(`${import.meta.env.VITE_API_URL}/chat/history/${SESSION_ID}`, { method: "DELETE", headers });
         } catch { }
     };
 
