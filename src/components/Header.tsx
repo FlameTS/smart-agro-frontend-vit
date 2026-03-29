@@ -6,10 +6,10 @@ import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
 
 const LABELS = {
-  en: { home: "Home", about: "About", team: "Team", login: "Login with Google", logout: "Logout" },
-  hi: { home: "होम", about: "के बारे में", team: "टीम", login: "Google से लॉगिन करें", logout: "लॉगआउट" },
-  ta: { home: "முகப்பு", about: "பற்றி", team: "அணி", login: "Google உடன் உள்நுழைக", logout: "வெளியேறு" },
-  pa: { home: "ਹੋਮ", about: "ਬਾਰੇ", team: "ਟੀਮ", login: "Google ਨਾਲ ਲੌਗਇਨ ਕਰੋ", logout: "ਲਾਗਆਉਟ" },
+  en: { home: "Home", about: "About", team: "Team", marketplace: "Marketplace", login: "Login with Google", logout: "Logout" },
+  hi: { home: "होम", about: "के बारे में", team: "टीम", marketplace: "बाजार", login: "Google से लॉगिन करें", logout: "लॉगआउट" },
+  ta: { home: "முகப்பு", about: "பற்றி", team: "அணி", marketplace: "சந்தை", login: "Google உடன் உள்நுழைக", logout: "வெளியேறு" },
+  pa: { home: "ਹੋਮ", about: "ਬਾਰੇ", team: "ਟੀਮ", marketplace: "ਮਾਰਕੀਟਪਲੇਸ", login: "Google ਨਾਲ ਲੌਗਇਨ ਕਰੋ", logout: "ਲਾਗਆਉਟ" },
 };
 
 const Header = () => {
@@ -22,6 +22,7 @@ const Header = () => {
 
   const links = [
     { to: "/", label: t.home },
+    { to: "/marketplace", label: t.marketplace },
     { to: "/about", label: t.about },
     { to: "/team", label: t.team },
   ];
@@ -50,7 +51,7 @@ const Header = () => {
               {l.label}
             </Link>
           ))}
-          
+
           <div className="ml-4 flex items-center gap-3 border-l pl-4 border-primary-foreground/20">
             {user ? (
               <>
@@ -102,7 +103,7 @@ const Header = () => {
               {l.label}
             </Link>
           ))}
-          
+
           <div className="mt-2 border-t border-primary-foreground/20 pt-2 flex items-center justify-between px-2">
             {user ? (
               <>
