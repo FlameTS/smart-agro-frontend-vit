@@ -8,19 +8,25 @@ export async function getAuthHeaders() {
   return { Authorization: `Bearer ${token}` };
 }
 
-export async function predictCrop(file: File, lang: string) {
+export async function predictCrop(file: File, lang: string, mode: string) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   const formData = new FormData();
   formData.append("file", file);
-
   formData.append("lang", lang);
 
   console.log("LANG SENT:", lang);
+  console.log("MODE:", mode);
+
   try {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/predict`, {
+
+    // 🔥 Decide endpoint based on mode
+    const endpoint =
+      mode === "advanced" ? "/predict/segment" : "/predict";
+
+    const response = await fetch(`${API_BASE}${endpoint}`, {
       method: "POST",
       body: formData,
       headers,

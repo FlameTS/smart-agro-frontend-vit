@@ -15,18 +15,26 @@ const LABELS = {
   en: {
     title: "Smart Agro Crop Disease Detection",
     subtitle: "Upload a photo of your crop leaf and get instant AI-based disease analysis with treatment recommendations.",
+    modeAdvanced: "⭐ Advanced Detection",
+    modeQuick: "⚡ Quick Scan",
   },
   hi: {
     title: "स्मार्ट एग्रो फसल रोग पहचान",
     subtitle: "अपनी फसल की पत्ती की फोटो अपलोड करें और उपचार की सिफारिशों के साथ तत्काल AI-आधारित रोग विश्लेषण प्राप्त करें।",
+    modeAdvanced: "⭐ विस्तृत जांच",
+    modeQuick: "⚡ त्वरित जांच",
   },
   ta: {
     title: "ஸ்மார்ட் அக்ரோ பயிர் நோய் கண்டறிதல்",
     subtitle: "உங்கள் பயிர் இலையின் புகைப்படத்தை பதிவேற்றி சிகிச்சை பரிந்துரைகளுடன் உடனடி AI-அடிப்படையிலான நோய் பகுப்பாய்வைப் பெறுங்கள்.",
+    modeAdvanced: "⭐ விரிவான பகுப்பாய்வு",
+    modeQuick: "⚡ விரைவு சோதனை",
   },
   pa: {
     title: "ਸਮਾਰਟ ਐਗਰੋ ਫਸਲ ਰੋਗ ਖੋਜ",
     subtitle: "ਆਪਣੀ ਫਸਲ ਦੀ ਪੱਤੀ ਦੀ ਫੋਟੋ ਅਪਲੋਡ ਕਰੋ ਅਤੇ ਇਲਾਜ ਦੀਆਂ ਸਿਫ਼ਾਰਸ਼ਾਂ ਦੇ ਨਾਲ ਤੁਰੰਤ AI-ਆਧਾਰਿਤ ਰੋਗ ਵਿਸ਼ਲੇਸ਼ਣ ਪ੍ਰਾਪਤ ਕਰੋ।",
+    modeAdvanced: "⭐ ਵਿਸਤ੍ਰਿਤ ਖੋਜ",
+    modeQuick: "⚡ ਤੇਜ਼ ਸਕੈਨ",
   },
 };
 
@@ -46,11 +54,13 @@ const Index = () => {
 
   const t = LABELS[lang] ?? LABELS["en"];
 
+  const [mode, setMode] = useState("advanced");
+
   const handleAnalyze = useCallback(async (file: File) => {
     setIsProcessing(true);
 
     try {
-      const data = await predictCrop(file, lang);
+      const data = await predictCrop(file, lang, mode);
 
       if (data.status === "success") {
         setTimeout(() => refetch(), 1000);
@@ -59,6 +69,7 @@ const Index = () => {
       navigate("/result", {
         state: {
           ...data,
+          mode,
           image_url: URL.createObjectURL(file),
 
         },
@@ -70,7 +81,7 @@ const Index = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [navigate, refetch, lang]);
+  }, [navigate, refetch, lang, mode]);
 
 
   return (
@@ -104,6 +115,28 @@ const Index = () => {
                       {l.label}
                     </button>
                   ))}
+                </div>
+                {/* Mode Selector */}
+                <div className="mt-4 flex gap-4">
+                  <button
+                    onClick={() => setMode("advanced")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium ${mode === "advanced"
+                      ? "bg-green-600 text-white"
+                      : "bg-muted text-muted-foreground"
+                      }`}
+                  >
+                    {t.modeAdvanced}
+                  </button>
+
+                  <button
+                    onClick={() => setMode("quick")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium ${mode === "quick"
+                      ? "bg-blue-600 text-white"
+                      : "bg-muted text-muted-foreground"
+                      }`}
+                  >
+                    {t.modeQuick}
+                  </button>
                 </div>
               </div>
             </div>

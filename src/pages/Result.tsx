@@ -103,6 +103,8 @@ export default function ResultPage() {
     cure,
     image_url,
     gradcam_image,
+    seg_image_url,
+    mode,
   } = data;
 
   /* 🔴 LOW CONFIDENCE CASE */
@@ -154,7 +156,7 @@ export default function ResultPage() {
           <p className="text-gray-700">{crop_info}</p>
         </section>
 
-        {gradcam_image && (
+        {mode === "quick" && gradcam_image && (
           <section className="space-y-2">
             <h2 className="text-xl font-semibold">{t.gradcam}</h2>
             <div className="w-full h-64 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
@@ -165,6 +167,22 @@ export default function ResultPage() {
               />
             </div>
             <p className="text-sm text-gray-500">{t.gradcamNote}</p>
+          </section>
+        )}
+
+        {mode === "advanced" && seg_image_url && (
+          <section className="space-y-2">
+            <h2 className="text-xl font-semibold">🧠 Segmentation Result</h2>
+            <div className="w-full h-64 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+              <img
+                src={seg_image_url}
+                alt="Segmentation"
+                className="object-contain h-full"
+              />
+            </div>
+            <p className="text-sm text-gray-500">
+              Highlighted areas show detected disease regions.
+            </p>
           </section>
         )}
 
