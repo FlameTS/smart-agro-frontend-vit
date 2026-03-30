@@ -60,6 +60,7 @@ const Index = () => {
     setIsProcessing(true);
 
     try {
+      const apiMode = "quick"; // force quick backend
       const data = await predictCrop(file, lang, mode);
 
       if (data.status === "success") {
