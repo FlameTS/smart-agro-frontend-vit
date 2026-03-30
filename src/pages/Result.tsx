@@ -111,7 +111,7 @@ export default function ResultPage() {
   const safeConfidence = Number(confidence) || 0;
 
   /* 🔴 LOW CONFIDENCE CASE */
-  if (safeConfidence < CONFIDENCE_THRESHOLD) {
+  if (mode === "quick" && safeConfidence < CONFIDENCE_THRESHOLD) {
     return (
       <div className="min-h-screen bg-green-50 p-6 flex items-center justify-center">
         <div className="max-w-xl bg-white rounded-2xl shadow-lg p-8 text-center space-y-4">
