@@ -18,17 +18,20 @@ export function usePredictionHistory(limit = 20) {
 
   const fetchHistory = useCallback(async () => {
     setLoading(true);
+    
+    // Only fetch history if user is authenticated
+    if (!user) {
+      setHistory([]);
+      setLoading(false);
+      return;
+    }
+    
     let query = supabase
       .from("prediction_history")
       .select("id, crop_name, disease_name, confidence, image_url, created_at")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(limit);
-
-    if (user) {
-      query = query.eq("user_id", user.id);
-    } else {
-      query = query.is("user_id", null);
-    }
 
     const { data, error } = await query;
 
