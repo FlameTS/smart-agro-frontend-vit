@@ -5,6 +5,7 @@ import ChatBot from "@/components/ChatBot";
 
 const CONFIDENCE_THRESHOLD = 0.6;
 
+
 const LABELS = {
   en: {
     title: "SmartAgro Diagnosis Result",
@@ -107,8 +108,10 @@ export default function ResultPage() {
     mode,
   } = data;
 
+  const safeConfidence = Number(confidence) || 0;
+
   /* 🔴 LOW CONFIDENCE CASE */
-  if (confidence < CONFIDENCE_THRESHOLD) {
+  if (safeConfidence < CONFIDENCE_THRESHOLD) {
     return (
       <div className="min-h-screen bg-green-50 p-6 flex items-center justify-center">
         <div className="max-w-xl bg-white rounded-2xl shadow-lg p-8 text-center space-y-4">
@@ -117,7 +120,7 @@ export default function ResultPage() {
           <p className="text-gray-700">{t.lowConfDesc}</p>
 
           <p className="text-sm text-gray-500">
-            {t.confidence}: {(confidence * 100).toFixed(2)}%
+            {t.confidence}: {safeConfidence ? (safeConfidence * 100).toFixed(2) : "0.00"}%
           </p>
 
           <div className="flex justify-center gap-4 pt-4">
@@ -152,7 +155,7 @@ export default function ResultPage() {
 
         <section className="space-y-2">
           <h2 className="text-xl font-semibold">{t.cropDetected}</h2>
-          <p className="text-lg font-medium">{crop}</p>
+          <p className="text-lg font-medium">{crop || "Not detected"}</p>
           <p className="text-gray-700">{crop_info}</p>
         </section>
 
@@ -170,16 +173,30 @@ export default function ResultPage() {
           </section>
         )}
 
-        {mode === "advanced" && seg_image_url && (
+        {mode === "advanced" && (
           <section className="space-y-2">
             <h2 className="text-xl font-semibold">🧠 Segmentation Result</h2>
+
             <div className="w-full h-64 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
-              <img
-                src={seg_image_url}
-                alt="Segmentation"
-                className="object-contain h-full"
-              />
+
+              {seg_image_url ? (
+                <img
+                  src={seg_image_url}
+                  alt="Segmentation"
+                  className="object-contain h-full"
+                />
+              ) : data.annotated_image ? (
+                <img
+                  src={`data:image/jpeg;base64,${data.annotated_image}`}
+                  alt="Annotated"
+                  className="object-contain h-full"
+                />
+              ) : (
+                <p className="text-gray-400">No segmentation image</p>
+              )}
+
             </div>
+
             <p className="text-sm text-gray-500">
               Highlighted areas show detected disease regions.
             </p>
@@ -201,7 +218,9 @@ export default function ResultPage() {
             <p className="text-green-600 font-medium">{t.healthy}</p>
           ) : (
             <>
-              <p className="text-red-600 font-medium">{disease}</p>
+              <p className="text-red-600 font-medium">
+                {disease || "Not detected"}
+              </p>
               <p className="text-gray-700">{disease_info}</p>
             </>
           )}
@@ -215,7 +234,7 @@ export default function ResultPage() {
         )}
 
         <div className="pt-4 text-sm text-gray-500 text-center">
-          {t.confidence}: {(confidence * 100).toFixed(2)}%
+          {t.confidence}: {(safeConfidence * 100).toFixed(2)}%
         </div>
 
         <div className="pt-6 flex justify-center">
