@@ -61,7 +61,7 @@ const Index = () => {
 
     try {
       const apiMode = "quick"; // force quick backend
-      const data = await predictCrop(file, lang, mode);
+      const data = await predictCrop(file, lang, apiMode);
 
       if (data.status === "success") {
         setTimeout(() => refetch(), 1000);
